@@ -134,13 +134,20 @@ class HeadersController extends Controller
             $parse_headers["redirected"] = true;
             foreach($parse_headers["raw_headers"] as $key => $value)
             {
-                if(!is_numeric($key) && !is_array($value["value"]))
+                if(!is_array($value["value"]))
                 {
-                    $parse_headers["site_headers"][] = array("key" => $value["key"], "value" => $value);
+                    $parse_headers["site_headers"][] = array("key" => $value["key"], "value" => $value["value"]);
                 }
                 else if(is_array($value["value"]) && $value["value"][1] && $value["key"] != "Set-Cookie")
                 {
                     $parse_headers["site_headers"][] = array("key" => $value["key"], "value" => $value["value"][1]);
+                }
+                else if(is_array($value["value"]) && $value["key"] == "Set-Cookie")
+                {
+                    foreach($value["value"] as $key2 => $value2)
+                    {
+                        $parse_headers["site_headers"][] = array("key" => $value["key"], "value" => $value2);
+                    }
                 }
             }
         }
