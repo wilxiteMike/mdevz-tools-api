@@ -38,19 +38,21 @@ class DnsController extends Controller
 
                 $this->dns["hostname"] = $hostname;
                 
-                $this->dns["a"]     = dns_get_record($hostname, DNS_A);
-                $this->dns["cname"] = dns_get_record($hostname, DNS_CNAME);
-                $this->dns["ns"]    = dns_get_record($hostname, DNS_NS);
-                $this->dns["mx"]    = dns_get_record($hostname, DNS_MX);
-                $this->dns["soa"]   = dns_get_record($hostname, DNS_SOA);
-                $this->dns["txt"]   = dns_get_record($hostname, DNS_TXT);
-                $this->dns["aaaa"]  = dns_get_record($hostname, DNS_AAAA);
-                $this->dns["hinfo"] = dns_get_record($hostname, DNS_HINFO);
-                $this->dns["ptr"]   = dns_get_record($hostname, DNS_PTR);
-                $this->dns["srv"]   = dns_get_record($hostname, DNS_SRV);
-                $this->dns["naptr"] = dns_get_record($hostname, DNS_NAPTR);
-                $this->dns["a6"]    = dns_get_record($hostname, DNS_A6);
-                $this->dns["any"]   = dns_get_record($hostname, DNS_ANY);
+                $this->dns["records"]["a"]     = dns_get_record($hostname, DNS_A);
+                $this->dns["records"]["cname"] = dns_get_record($hostname, DNS_CNAME);
+                $this->dns["records"]["ns"]    = dns_get_record($hostname, DNS_NS);
+                $this->dns["records"]["mx"]    = dns_get_record($hostname, DNS_MX);
+                $this->dns["records"]["soa"]   = dns_get_record($hostname, DNS_SOA);
+                $this->dns["records"]["txt"]   = dns_get_record($hostname, DNS_TXT);
+                $this->dns["records"]["aaaa"]  = dns_get_record($hostname, DNS_AAAA);
+                $this->dns["records"]["hinfo"] = dns_get_record($hostname, DNS_HINFO);
+                $this->dns["records"]["ptr"]   = dns_get_record($hostname, DNS_PTR);
+                $this->dns["records"]["srv"]   = dns_get_record($hostname, DNS_SRV);
+                $this->dns["records"]["naptr"] = dns_get_record($hostname, DNS_NAPTR);
+                $this->dns["records"]["a6"]    = dns_get_record($hostname, DNS_A6);
+
+                foreach($this->dns["records"] as $key => $value)
+                    if(!$value) unset($this->dns["records"][$key]);
 
 
                 return response()->json(array("dns" => $this->dns));
