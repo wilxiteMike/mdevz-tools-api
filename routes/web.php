@@ -16,3 +16,5 @@ $router->get('/', function () use ($router) {
 });
 
 $router->get('headers/check', 'HeadersController@check');
+
+$router->get('dns/check', 'DnsController@check');
