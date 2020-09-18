@@ -30,15 +30,20 @@ class HeadersController extends Controller
                 try{
                     $this->headers = array_merge($this->headers, $this->header_parser(get_headers ($this->site, true)));
                     $this->headers["https_redirect"] = $this->check_https($this->site);
-                    $this->headers["ip"] = gethostbyname($this->headers["url_parsed"]["host"]);
+                    if(isset($this->headers["url_parsed"]["host"])) 
+                        $this->headers["ip"] = gethostbyname($this->headers["url_parsed"]["host"]);
+                    elseif(isset($this->headers["url_parsed"]["path"])) 
+                        $this->headers["ip"] = gethostbyname($this->headers["url_parsed"]["path"]);
+                    else 
+                        $this->headers["ip"] = "unavailable";
                 }
                 catch (\Exception $e) 
                 {
-                    return response()->json(array("error" => "Error getting site headers, site might not exist"), 400);
+                    return response()->json(array("error" => "Error getting site headers, site might not exist", "real_error" => $e->getMessage(), "error_headers" => $this->headers), 400);
                 } 
                 catch (\Error $e) 
                 {
-                    return response()->json(array("error" => "Unexpected error"), 400);
+                    return response()->json(array("error" => "Unexpected error", "real_error" => $e->getMessage(), "error_headers" => $this->headers), 400);
                 }
 
                 return response()->json(array("headers" => $this->headers));
