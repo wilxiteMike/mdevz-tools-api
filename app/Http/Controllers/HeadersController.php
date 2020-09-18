@@ -27,9 +27,21 @@ class HeadersController extends Controller
         {
             // validate URL 
             if (filter_var($this->site, FILTER_VALIDATE_URL)) {
-                $this->headers = get_headers ($this->site, false);
+                try{
+                    $this->headers = array_merge($this->headers, $this->header_parser(get_headers ($this->site, true)));
+                    $this->headers["https_redirect"] = $this->check_https($this->site);
+                    $this->headers["ip"] = gethostbyname($this->headers["url_parsed"]["host"]);
+                }
+                catch (\Exception $e) 
+                {
+                    return response()->json(array("error" => "Error getting site headers, site might not exist"), 400);
+                } 
+                catch (\Error $e) 
+                {
+                    return response()->json(array("error" => "Unexpected error"), 400);
+                }
 
-                return response()->json($this->headers);
+                return response()->json(array("headers" => $this->headers));
             }
             else 
             {
@@ -44,11 +56,12 @@ class HeadersController extends Controller
         return response()->json(array("error" => "Unexpected error"), 400);
     }
 
-    private function url_parser($url) {
+    private function url_parser(String $url) {
         // multiple /// messes up parse_url, replace 2+ with 2
         $url = preg_replace('/(\/{2,})/','//',$url);
         
         $parse_url = parse_url($url);
+        $this->headers["url_parsed"] = $parse_url;
         
         if(empty($parse_url["scheme"])) {
             $parse_url["scheme"] = "http";
@@ -62,7 +75,7 @@ class HeadersController extends Controller
         $return_url = "";
         
         // Check if scheme is correct
-        if(!in_array($parse_url["scheme"], array("http", "https", "gopher"))) {
+        if(!in_array($parse_url["scheme"], array("http", "https"))) {
             $return_url .= 'http'.'://';
         } else {
             $return_url .= $parse_url["scheme"].'://';
@@ -102,5 +115,49 @@ class HeadersController extends Controller
         return $return_url;
     }
 
+    private function header_parser(Array $headers) {
+        $parse_headers = array();
+
+        $parse_headers["raw_headers"] = $headers;
+
+        $response_code = substr($parse_headers["raw_headers"][0], 9, 3);
+        if($response_code == 300 || $response_code == 301 || $response_code == 302 || $response_code == 303) 
+        {
+            $parse_headers["redirected"] = true;
+            foreach($parse_headers["raw_headers"] as $key => $value)
+            {
+                if(!is_numeric($key) && !is_array($value))
+                {
+                    $parse_headers["site_headers"][$key] = $value;
+                }
+                else if(is_array($value) && $value[1] && $key != "Set-Cookie")
+                {
+                    $parse_headers["site_headers"][$key] = $value[1];
+                }
+            }
+        }
+        else
+        {
+            $parse_headers["redirected"] = false;
+            $parse_headers["site_headers"] = $parse_headers["raw_headers"];
+        }
+
+        $parse_headers["response_code"] = $response_code;
+
+        return $parse_headers;
+    }
+
+    private function check_https(String $url) 
+    {
+        // Check if https url is specified
+        if(strpos($url, 'https') !== false) $insecure_url = str_replace("https", "http", $url);
+        else $insecure_url = $url;
+
+        $headers = get_headers ($insecure_url, true);
+
+        if(strpos($headers["Location"] , 'https') !== false) return true;
+        else return false;
+
+    }
     //
 }
