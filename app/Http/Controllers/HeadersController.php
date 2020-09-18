@@ -122,8 +122,9 @@ class HeadersController extends Controller
 
     private function header_parser(Array $headers) {
         $parse_headers = array();
+        $original_headers = $headers;
 
-        foreach($headers as $key => $value)
+        foreach($original_headers as $key => $value)
         {
             $parse_headers["raw_headers"][] = array("key" => $key, "value" => $value); 
         }
@@ -131,14 +132,16 @@ class HeadersController extends Controller
         $response_code = substr($parse_headers["raw_headers"][0]["value"], 9, 3);
         if($response_code == 300 || $response_code == 301 || $response_code == 302 || $response_code == 303) 
         {
+            $final_redirect = max(array_keys($original_headers));
             $parse_headers["redirected"] = true;
+            $parse_headers["site_headers"][] = array("key" => "HTTP", "value" => $original_headers[$final_redirect]);
             foreach($parse_headers["raw_headers"] as $key => $value)
             {
-                if(!is_array($value["value"]))
+                if(!is_numeric($value["key"]) && !is_array($value["value"]))
                 {
                     $parse_headers["site_headers"][] = array("key" => $value["key"], "value" => $value["value"]);
                 }
-                else if(is_array($value["value"]) && $value["value"][1] && $value["key"] != "Set-Cookie")
+                else if(is_array($value["value"]) && $value["value"][$final_redirect] && $value["key"] != "Set-Cookie")
                 {
                     $parse_headers["site_headers"][] = array("key" => $value["key"], "value" => $value["value"][1]);
                 }
