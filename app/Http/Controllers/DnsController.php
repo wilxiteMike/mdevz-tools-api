@@ -55,12 +55,12 @@ class DnsController extends Controller
                 $raw_records["a6"]    = @dns_get_record($hostname, DNS_A6);
 
                 $records = array();
+                $recordCount = 0;
                 foreach($raw_records as $key => $value)
                 {
                     if(!$value) unset($raw_records[$key]);
                     else 
                     {
-                        $recordCount = 0;
                         foreach($raw_records[$key] as $recordKey => $recordValue)
                         {
                             $records[$recordCount]["type"]      = array_key_exists('type', $recordValue)    ? $recordValue["type"]      : "";
