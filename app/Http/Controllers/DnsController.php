@@ -55,7 +55,6 @@ class DnsController extends Controller
                 $raw_records["a6"]    = @dns_get_record($hostname, DNS_A6);
 
                 $records = array();
-                $raw_records = array();
                 foreach($raw_records as $key => $value)
                 {
                     if(!$value) unset($raw_records[$key]);
@@ -68,7 +67,6 @@ class DnsController extends Controller
                             $records[$recordCount]["host"]      = $recordValue["host"];
                             $records[$recordCount]["ttl"]       = $recordValue["ttl"];
                             $records[$recordCount]["target"]    = $recordValue["target"];
-                            $raw_records[$recordCount] = $recordValue;
                             $recordCount++;
                         }
                     }
