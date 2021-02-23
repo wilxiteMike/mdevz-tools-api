@@ -63,10 +63,10 @@ class DnsController extends Controller
                         $recordCount = 0;
                         foreach($raw_records[$key] as $recordKey => $recordValue)
                         {
-                            $records[$recordCount]["type"]      = $recordValue["type"];
-                            $records[$recordCount]["host"]      = $recordValue["host"];
-                            $records[$recordCount]["ttl"]       = $recordValue["ttl"];
-                            $records[$recordCount]["target"]    = $recordValue["target"];
+                            $records[$recordCount]["type"]      = $recordValue["type"]      ? $recordValue["type"]      : "";
+                            $records[$recordCount]["host"]      = $recordValue["host"]      ? $recordValue["host"]      : "";
+                            $records[$recordCount]["ttl"]       = $recordValue["ttl"]       ? $recordValue["ttl"]       : "";
+                            $records[$recordCount]["target"]    = $recordValue["target"]    ? $recordValue["target"]    : "";
                             $recordCount++;
                         }
                     }
