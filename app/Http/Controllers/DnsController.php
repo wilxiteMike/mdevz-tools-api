@@ -66,7 +66,8 @@ class DnsController extends Controller
                             $records[$recordCount]["type"]      = array_key_exists('type', $recordValue)    ? $recordValue["type"]      : "";
                             $records[$recordCount]["host"]      = array_key_exists('host', $recordValue)    ? $recordValue["host"]      : "";
                             $records[$recordCount]["ttl"]       = array_key_exists('ttl', $recordValue)     ? $recordValue["ttl"]       : "";
-                            $records[$recordCount]["target"]    = array_key_exists('target', $recordValue)  ? $recordValue["target"]    : "";
+                            if(array_key_exists('target', $recordValue)) $records[$recordCount]["value"]    = $recordValue["target"];
+                            else if(array_key_exists('txt', $recordValue)) $records[$recordCount]["value"]  = $recordValue["txt"];
                             $recordCount++;
                         }
                     }
