@@ -39,6 +39,7 @@ class DnsController extends Controller
                 $this->dns["hostname"] = $hostname;
 
                 $this->dns["records"] = "";
+                $this->dns["raw_records"] = "";
                 
                 $raw_records["a"]     = @dns_get_record($hostname, DNS_A);
                 $raw_records["cname"] = @dns_get_record($hostname, DNS_CNAME);
@@ -54,24 +55,26 @@ class DnsController extends Controller
                 $raw_records["a6"]    = @dns_get_record($hostname, DNS_A6);
 
                 $records = array();
-                $count = 0;
+                $raw_records = array();
                 foreach($raw_records as $key => $value)
                 {
                     if(!$value) unset($raw_records[$key]);
                     else 
                     {
-                        $records[$count]["type"] = $key;
                         $recordCount = 0;
                         foreach($raw_records[$key] as $recordKey => $recordValue)
                         {
-                            $records[$count]["records"][$recordCount]["name"] = $recordKey;
-                            $records[$count]["records"][$recordCount]["value"] = $recordValue;
+                            $records[$recordCount]["type"]      = $recordValue["type"];
+                            $records[$recordCount]["host"]      = $recordValue["host"];
+                            $records[$recordCount]["ttl"]       = $recordValue["ttl"];
+                            $records[$recordCount]["target"]    = $recordValue["target"];
+                            $raw_records[$recordCount] = $recordValue;
                             $recordCount++;
                         }
                     }
-                    $count++;
                 }
                 $this->dns["records"] = $records;
+                $this->dns["raw_records"] = $raw_records;
 
 
                 return response()->json(array("dns" => $this->dns));
